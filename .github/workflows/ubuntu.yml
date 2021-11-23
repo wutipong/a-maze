@@ -1,0 +1,42 @@
+name: ubuntu-build
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - run: "export"
+
+      - run: >-
+          sudo apt install -y 
+          build-essential cmake curl zip unzip tar make 
+          libgl1-mesa-dev libx11-dev libxcursor-dev 
+          libxinerama-dev libxrandr-dev libxi-dev
+
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 11
+          platform: x64
+
+      - name: Create output dir
+        run: mkdir out
+        
+      - name: Configure the project.
+        run: cmake $GITHUB_WORKSPACE
+        working-directory: out
+
+      - name: Build the project.
+        run: cmake --build $GITHUB_WORKSPACE/out
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu
+          path: out
