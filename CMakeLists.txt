@@ -16,9 +16,12 @@ add_executable(
 	"main.cpp" 
 )
 
+add_subdirectory(maze-gen)
+
 find_package(raylib CONFIG REQUIRED)
-target_include_directories(${PROJECT_NAME} PRIVATE ${RAYLIB_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${RAYLIB_LIBRARIES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${RAYLIB_INCLUDE_DIRS} maze-gen)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${RAYLIB_LIBRARIES} maze-gen)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 

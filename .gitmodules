@@ -1,3 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "maze-gen"]
+	path = maze-gen
+	url = https://github.com/wutipong/maze-gen.git
