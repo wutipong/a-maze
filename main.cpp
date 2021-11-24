@@ -1,29 +1,45 @@
-#include <fmt/core.h>
 #include <maze.hpp>
 #include <maze_path.hpp>
 #include <raylib.h>
 
 using namespace MazeGen;
 
-void DrawCell(Cell &c, int columnId, int rowId);
+constexpr int CellWidth = 100;
+constexpr int CellHeight = CellWidth;
+
+constexpr int from = 50;
+constexpr int to = 1492;
+
+struct CellOption
+{
+    bool isGoal = false;
+    bool isInPath = false;
+};
+
+void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {});
+
+void Update(Camera2D &camera, Maze &maze, int &currentCell, bool &showPath, Path &path);
 
 int main()
 {
     constexpr int screenWidth = 800;
     constexpr int screenHeight = 450;
 
-    constexpr int from = 50;
-    constexpr int to = 1250;
-
-    InitWindow(screenWidth, screenHeight, "raylib-template");
+    InitWindow(screenWidth, screenHeight, "A-Maze");
     SetTargetFPS(60);
 
     auto maze = MazeGen::Generate(50, 50);
-    auto path = MazeGen::FindPathDFS(maze, from, to);
+    Path path = MazeGen::FindPathDFS(maze, from, to);
+    bool isShowingPath = false;
+
+    SetTargetFPS(15);
+
+    int currentCell = from;
 
     Camera2D camera{.offset = {screenWidth / 2.0f, screenHeight / 2.0f}, .zoom = 1.0f};
     while (!WindowShouldClose())
     {
+        Update(camera, maze, currentCell, isShowingPath, path);
         BeginDrawing();
         {
             ClearBackground(BLACK);
@@ -35,7 +51,16 @@ int main()
                     int x = i % maze.column;
                     int y = i / maze.column;
 
-                    DrawCell(maze[i], x, y);
+                    CellOption option;
+                    option.isGoal = (i == to);
+
+                    if (isShowingPath &&
+                        std::find_if(path.begin(), path.end(), [&i](auto &n) { return (n.cell == i); }) != path.end())
+                    {
+                        option.isInPath = true;
+                    }
+
+                    DrawCell(maze[i], x, y, option);
                 }
             }
             EndMode2D();
@@ -50,15 +75,69 @@ int main()
     return 0;
 }
 
-void DrawCell(Cell &c, int columnId, int rowId)
+void Update(Camera2D &camera, Maze &maze, int &currentCell, bool &showPath, Path &path)
 {
-    constexpr int CellWidth = 100;
-    constexpr int CellHeight = CellWidth;
+    Cell c = maze[currentCell];
 
+    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
+    {
+        int cell = c.ConnectedCell(Direction::North);
+        if (cell != InvalidCell)
+        {
+            currentCell = cell;
+        }
+    }
+
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
+    {
+        int cell = c.ConnectedCell(Direction::South);
+        if (cell != InvalidCell)
+        {
+            currentCell = cell;
+        }
+    }
+
+    if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A))
+    {
+        int cell = c.ConnectedCell(Direction::West);
+        if (cell != InvalidCell)
+        {
+            currentCell = cell;
+        }
+    }
+
+    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
+    {
+        int cell = c.ConnectedCell(Direction::East);
+        if (cell != InvalidCell)
+        {
+            currentCell = cell;
+        }
+    }
+
+    if (IsKeyPressed(KEY_P))
+    {
+        showPath = !showPath;
+        if (showPath)
+            path = FindPathDFS(maze, currentCell, to);
+    }
+
+    int x = currentCell % maze.column;
+    int y = currentCell / maze.column;
+
+    camera.target = {.x = float(x) * CellWidth, .y = float(y) * CellHeight};
+}
+
+void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option)
+{
     constexpr int HalfWidth = CellWidth / 2;
     constexpr int HalfHeight = CellHeight / 2;
 
     constexpr int WallThickness = 20;
+
+    constexpr auto WallColor = LIGHTGRAY;
+    constexpr auto GoalCell = DARKGREEN;
+    constexpr auto InPath = YELLOW;
 
     const int originX = columnId * CellWidth;
     const int originY = rowId * CellHeight;
@@ -66,19 +145,48 @@ void DrawCell(Cell &c, int columnId, int rowId)
     const int cellLeft = originX - HalfWidth;
     const int cellRight = originX + HalfWidth;
     const int cellTop = originY - HalfHeight;
-    const int cellBottom = originY - HalfHeight;
+    const int cellBottom = originY + HalfHeight;
 
     const int cellInnerLeft = cellLeft + WallThickness;
     const int cellInnerRight = cellRight - WallThickness;
     const int cellInnerTop = cellTop + WallThickness;
     const int cellInnerBottom = cellBottom - WallThickness;
 
-    // DrawRectangle(originX - HalfWidth, originY - HalfHeight, CellWidth, CellHeight, DARKGRAY);
+    const int WallWidth = CellWidth - WallThickness * 2;
+    const int WallHeight = CellHeight - WallThickness * 2;
 
-    DrawRectangle(cellLeft, cellTop, WallThickness, WallThickness, DARKGREEN);
-    DrawRectangle(cellInnerRight, cellTop, WallThickness, WallThickness, RED);
-    DrawRectangle(cellLeft, cellInnerBottom, WallThickness, WallThickness, DARKBLUE);
-    DrawRectangle(cellInnerRight, cellInnerBottom, WallThickness, WallThickness, DARKGRAY);
+    if (option.isInPath)
+    {
+        DrawRectangle(originX - HalfWidth, originY - HalfHeight, CellWidth, CellHeight, InPath);
+    }
 
-    DrawText(fmt::format("{0}, {1}", columnId, rowId).c_str(), originX, originY, 20, LIGHTGRAY);
+    if (option.isGoal)
+    {
+        DrawRectangle(originX - HalfWidth, originY - HalfHeight, CellWidth, CellHeight, GoalCell);
+    }
+
+    DrawRectangle(cellLeft, cellTop, WallThickness, WallThickness, WallColor);
+    DrawRectangle(cellInnerRight, cellTop, WallThickness, WallThickness, WallColor);
+    DrawRectangle(cellLeft, cellInnerBottom, WallThickness, WallThickness, WallColor);
+    DrawRectangle(cellInnerRight, cellInnerBottom, WallThickness, WallThickness, WallColor);
+
+    if (c.ConnectedCell(Direction::North) == InvalidCell)
+    {
+        DrawRectangle(cellInnerLeft, cellTop, WallWidth, WallThickness, WallColor);
+    }
+
+    if (c.ConnectedCell(Direction::South) == InvalidCell)
+    {
+        DrawRectangle(cellInnerLeft, cellInnerBottom, WallWidth, WallThickness, WallColor);
+    }
+
+    if (c.ConnectedCell(Direction::West) == InvalidCell)
+    {
+        DrawRectangle(cellLeft, cellInnerTop, WallThickness, WallHeight, WallColor);
+    }
+
+    if (c.ConnectedCell(Direction::East) == InvalidCell)
+    {
+        DrawRectangle(cellInnerRight, cellInnerTop, WallThickness, WallHeight, WallColor);
+    }
 }
