@@ -14,7 +14,7 @@ project(main)
 add_executable(
     ${PROJECT_NAME} 
 	"main.cpp" 
-)
+ "2d.hpp" "draw_2d.cpp")
 
 add_subdirectory(maze-gen)
 

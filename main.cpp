@@ -22,8 +22,8 @@ void Update(Camera2D &camera, Maze &maze, int &currentCell, bool &showPath, Path
 
 int main()
 {
-    constexpr int screenWidth = 800;
-    constexpr int screenHeight = 450;
+    constexpr int screenWidth = 1280;
+    constexpr int screenHeight = 720;
 
     InitWindow(screenWidth, screenHeight, "A-Maze");
     SetTargetFPS(60);
@@ -37,6 +37,15 @@ int main()
     int currentCell = from;
 
     Camera2D camera{.offset = {screenWidth / 2.0f, screenHeight / 2.0f}, .zoom = 1.0f};
+
+    // Define the camera to look into our 3d world
+    Camera3D camera3d = {
+        .position = {0.0f, 100.0f, 100.0f}, // Camera position
+        .target = {0.0f, 0.0f, 0.0f},     // Camera looking at point
+        .up = {0.0f, 1.0f, 0.0f},         // Camera up vector (rotation towards target)
+        .fovy = 45.0f,                    // Camera field-of-view Y
+        .projection = CAMERA_PERSPECTIVE,  // Camera mode type
+    };
     while (!WindowShouldClose())
     {
         Update(camera, maze, currentCell, isShowingPath, path);
@@ -64,6 +73,16 @@ int main()
                 }
             }
             EndMode2D();
+
+            BeginMode3D(camera3d);
+            {
+                Vector3 cubePosition = {0.0f, 2.0f, 0.0f};
+
+                DrawCube({0, 0, 0}, 10.0f, 10.0f, 10.0f, DARKGREEN);
+                DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
+                DrawPlane({0, 0, 0}, {2.0f, 2.0f}, GRAY);
+            }
+            EndMode3D();
 
             DrawCircle(screenWidth / 2, screenHeight / 2, 20, RED);
         }
