@@ -2,7 +2,13 @@
 #include <maze_path.hpp>
 #include <raylib.h>
 
+#ifdef RENDER_3D
+#include "draw_3d.hpp"
+using namespace Render3D;
+#else
 #include "draw_2d.hpp"
+using namespace Render2D;
+#endif
 
 using namespace MazeGen;
 
@@ -10,6 +16,7 @@ constexpr int from = 50;
 constexpr int to = 1492;
 
 void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path);
+
 
 int main()
 {
@@ -25,12 +32,12 @@ int main()
 
     int currentCell = from;
 
-    Render2D::Init(screenWidth, screenHeight);
+    Init(screenWidth, screenHeight);
 
     while (!WindowShouldClose())
     {
         Update(maze, currentCell, isShowingPath, path);
-        Render2D::Draw(maze, path, currentCell, to, isShowingPath);
+        Draw(maze, path, currentCell, to, isShowingPath);
     }
 
     CloseWindow();
