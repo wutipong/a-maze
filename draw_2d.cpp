@@ -21,8 +21,6 @@ constexpr auto InPath = YELLOW;
 int screenWidth = 0;
 int screenHeight = 0;
 
-Camera2D camera{.offset = {screenWidth / 2.0f, screenHeight / 2.0f}, .zoom = 1.0f};
-
 struct CellOption
 {
     bool isGoal = false;
@@ -44,8 +42,8 @@ void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
     const int cellInnerTop = cellTop + WallThickness;
     const int cellInnerBottom = cellBottom - WallThickness;
 
-    const int WallWidth = CellWidth - WallThickness * 2;
-    const int WallHeight = CellHeight - WallThickness * 2;
+    const int wallWidth = CellWidth - WallThickness * 2;
+    const int wallHeight = CellHeight - WallThickness * 2;
 
     if (option.isInPath)
     {
@@ -64,23 +62,28 @@ void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
 
     if (c.ConnectedCell(Direction::North) == InvalidCell)
     {
-        DrawRectangle(cellInnerLeft, cellTop, WallWidth, WallThickness, WallColor);
+        DrawRectangle(cellInnerLeft, cellTop, wallWidth, WallThickness, WallColor);
     }
 
     if (c.ConnectedCell(Direction::South) == InvalidCell)
     {
-        DrawRectangle(cellInnerLeft, cellInnerBottom, WallWidth, WallThickness, WallColor);
+        DrawRectangle(cellInnerLeft, cellInnerBottom, wallWidth, WallThickness, WallColor);
     }
 
     if (c.ConnectedCell(Direction::West) == InvalidCell)
     {
-        DrawRectangle(cellLeft, cellInnerTop, WallThickness, WallHeight, WallColor);
+        DrawRectangle(cellLeft, cellInnerTop, WallThickness, wallHeight, WallColor);
     }
 
     if (c.ConnectedCell(Direction::East) == InvalidCell)
     {
-        DrawRectangle(cellInnerRight, cellInnerTop, WallThickness, WallHeight, WallColor);
+        DrawRectangle(cellInnerRight, cellInnerTop, WallThickness, wallHeight, WallColor);
     }
+}
+
+bool IsCellOnPath(MazeGen::Path &path, int &i)
+{
+    return std::find_if(path.begin(), path.end(), [&i](auto &n) { return (n.cell == i); }) != path.end();
 }
 } // namespace
 
@@ -88,9 +91,12 @@ void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
 {
     auto [x, y] = maze.CellPosition(currentCell);
 
-    camera.offset = {screenWidth / 2.0f, screenHeight / 2.0f};
-    camera.zoom = 1.0f;
-    camera.target = {.x = float(x) * CellWidth, .y = float(y) * CellHeight};
+    Camera2D camera
+    {
+        .offset = {screenWidth / 2.0f, screenHeight / 2.0f},
+        .target = {.x = float(x) * CellWidth, .y = float(y) * CellHeight},
+        .zoom = 1.0f,
+    };
 
     BeginDrawing();
     {
@@ -100,14 +106,12 @@ void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
         {
             for (int i = 0; i < maze.cellCount; i++)
             {
-                int x = i % maze.column;
-                int y = i / maze.column;
+                auto [x, y] = maze.CellPosition(i);
 
                 CellOption option;
                 option.isGoal = (i == goalCell);
 
-                if (isShowingPath &&
-                    std::find_if(path.begin(), path.end(), [&i](auto &n) { return (n.cell == i); }) != path.end())
+                if (isShowingPath && IsCellOnPath(path, i))
                 {
                     option.isInPath = true;
                 }

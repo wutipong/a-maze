@@ -12,8 +12,8 @@ using namespace Render2D;
 
 using namespace MazeGen;
 
-constexpr int from = 50;
-constexpr int to = 1492;
+constexpr int from = 175;
+constexpr int to = 2092;
 
 void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path);
 
@@ -45,43 +45,43 @@ int main()
     return 0;
 }
 
-void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path)
+void Update(Maze &maze, int &currentCellId, bool &showPath, MazeGen::Path &path)
 {
-    Cell c = maze[currentCell];
+    Cell c = maze[currentCellId];
 
     if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
     {
-        int cell = c.ConnectedCell(Direction::North);
-        if (cell != InvalidCell)
+        int connectedCell = c.ConnectedCell(Direction::North);
+        if (connectedCell != InvalidCell)
         {
-            currentCell = cell;
+            currentCellId = connectedCell;
         }
     }
 
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
     {
-        int cell = c.ConnectedCell(Direction::South);
-        if (cell != InvalidCell)
+        int connectedCell = c.ConnectedCell(Direction::South);
+        if (connectedCell != InvalidCell)
         {
-            currentCell = cell;
+            currentCellId = connectedCell;
         }
     }
 
     if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A))
     {
-        int cell = c.ConnectedCell(Direction::West);
-        if (cell != InvalidCell)
+        int connectedCell = c.ConnectedCell(Direction::West);
+        if (connectedCell != InvalidCell)
         {
-            currentCell = cell;
+            currentCellId = connectedCell;
         }
     }
 
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
     {
-        int cell = c.ConnectedCell(Direction::East);
-        if (cell != InvalidCell)
+        int connectedCell = c.ConnectedCell(Direction::East);
+        if (connectedCell != InvalidCell)
         {
-            currentCell = cell;
+            currentCellId = connectedCell;
         }
     }
 
@@ -90,7 +90,7 @@ void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path)
         showPath = !showPath;
         if (showPath)
         {
-            path = FindPathDFS(maze, currentCell, to);
+            path = FindPathDFS(maze, currentCellId, to);
         }
     }
 }
