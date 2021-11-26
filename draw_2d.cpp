@@ -1,17 +1,36 @@
 #include "draw_2d.hpp"
+
+#include <raylib.h>
+
+using namespace MazeGen;
+
 namespace
 {
+constexpr int CellWidth = 100;
+constexpr int CellHeight = CellWidth;
+
+constexpr int HalfWidth = CellWidth / 2;
+constexpr int HalfHeight = CellHeight / 2;
+
+constexpr int WallThickness = 20;
+
+constexpr auto WallColor = LIGHTGRAY;
+constexpr auto GoalCell = DARKGREEN;
+constexpr auto InPath = YELLOW;
+
+int screenWidth = 0;
+int screenHeight = 0;
+
+Camera2D camera{.offset = {screenWidth / 2.0f, screenHeight / 2.0f}, .zoom = 1.0f};
+
+struct CellOption
+{
+    bool isGoal = false;
+    bool isInPath = false;
+};
+
 void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
 {
-    constexpr int HalfWidth = CellWidth / 2;
-    constexpr int HalfHeight = CellHeight / 2;
-
-    constexpr int WallThickness = 20;
-
-    constexpr auto WallColor = LIGHTGRAY;
-    constexpr auto GoalCell = DARKGREEN;
-    constexpr auto InPath = YELLOW;
-
     const int originX = columnId * CellWidth;
     const int originY = rowId * CellHeight;
 
@@ -63,8 +82,47 @@ void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
         DrawRectangle(cellInnerRight, cellInnerTop, WallThickness, WallHeight, WallColor);
     }
 }
-}
-void Draw2D(const MazeGen::Maze &maze, const MazeGen::Path &path, int currentCell, int goalCell)
-{
+} // namespace
 
+void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, int goalCell, bool isShowingPath)
+{
+    auto [x, y] = maze.CellPosition(currentCell);
+
+    camera.offset = {screenWidth / 2.0f, screenHeight / 2.0f};
+    camera.zoom = 1.0f;
+    camera.target = {.x = float(x) * CellWidth, .y = float(y) * CellHeight};
+
+    BeginDrawing();
+    {
+        ClearBackground(BLACK);
+
+        BeginMode2D(camera);
+        {
+            for (int i = 0; i < maze.cellCount; i++)
+            {
+                int x = i % maze.column;
+                int y = i / maze.column;
+
+                CellOption option;
+                option.isGoal = (i == goalCell);
+
+                if (isShowingPath &&
+                    std::find_if(path.begin(), path.end(), [&i](auto &n) { return (n.cell == i); }) != path.end())
+                {
+                    option.isInPath = true;
+                }
+
+                DrawCell(maze[i], x, y, option);
+            }
+        }
+        EndMode2D();
+        DrawCircle(screenWidth / 2, screenHeight / 2, 20, RED);
+    }
+    EndDrawing();
+}
+
+void Render2D::Init(int w, int h)
+{
+    screenWidth = w;
+    screenHeight = h;
 }
