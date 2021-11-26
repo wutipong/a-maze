@@ -15,6 +15,7 @@ add_executable(
     ${PROJECT_NAME} 
 	"main.cpp" 
     "draw_2d.cpp"
+    "draw_3d.cpp"
 )
 
 add_subdirectory(maze-gen)
@@ -33,18 +34,3 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Cocoa")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")
 endif()
-
-
-# file(GLOB_RECURSE GLSL_SOURCE_FILES
-#     "shaders/*.frag"
-#     "shaders/*.vert"
-# )
-
-# add_custom_target(SHADER_COMPILE 
-#     SOURCES ${GLSL_SOURCE_FILES} 
-#     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/shaders/"
-#     COMMAND ${CMAKE_COMMAND} -E copy ${GLSL_SOURCE_FILES} "${CMAKE_CURRENT_BINARY_DIR}/shaders/"
-# )
-# 
-# add_dependencies(main SHADER_COMPILE)
-

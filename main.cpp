@@ -23,20 +23,10 @@ int main()
     auto path = MazeGen::FindPathDFS(maze, from, to);
     bool isShowingPath = false;
 
-    SetTargetFPS(15);
-
     int currentCell = from;
 
     Render2D::Init(screenWidth, screenHeight);
 
-    // Define the camera to look into our 3d world
-    Camera3D camera3d = {
-        .position = {0.0f, 100.0f, 100.0f}, // Camera position
-        .target = {0.0f, 0.0f, 0.0f},     // Camera looking at point
-        .up = {0.0f, 1.0f, 0.0f},         // Camera up vector (rotation towards target)
-        .fovy = 45.0f,                    // Camera field-of-view Y
-        .projection = CAMERA_PERSPECTIVE,  // Camera mode type
-    };
     while (!WindowShouldClose())
     {
         Update(maze, currentCell, isShowingPath, path);
