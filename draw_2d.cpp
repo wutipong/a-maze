@@ -27,8 +27,10 @@ struct CellOption
     bool isInPath = false;
 };
 
-void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
+void DrawCell(Maze &maze, int cellId, const CellOption &option = {})
 {
+    auto [columnId, rowId] = maze.CellPosition(cellId);
+   
     const int originX = columnId * CellWidth;
     const int originY = rowId * CellHeight;
 
@@ -60,22 +62,22 @@ void DrawCell(Cell &c, int columnId, int rowId, const CellOption &option = {})
     DrawRectangle(cellLeft, cellInnerBottom, WallThickness, WallThickness, WallColor);
     DrawRectangle(cellInnerRight, cellInnerBottom, WallThickness, WallThickness, WallColor);
 
-    if (c.ConnectedCell(Direction::North) == InvalidCell)
+    if (maze[cellId].ConnectedCell(Direction::North) == InvalidCell)
     {
         DrawRectangle(cellInnerLeft, cellTop, wallWidth, WallThickness, WallColor);
     }
 
-    if (c.ConnectedCell(Direction::South) == InvalidCell)
+    if (maze[cellId].ConnectedCell(Direction::South) == InvalidCell)
     {
         DrawRectangle(cellInnerLeft, cellInnerBottom, wallWidth, WallThickness, WallColor);
     }
 
-    if (c.ConnectedCell(Direction::West) == InvalidCell)
+    if (maze[cellId].ConnectedCell(Direction::West) == InvalidCell)
     {
         DrawRectangle(cellLeft, cellInnerTop, WallThickness, wallHeight, WallColor);
     }
 
-    if (c.ConnectedCell(Direction::East) == InvalidCell)
+    if (maze[cellId].ConnectedCell(Direction::East) == InvalidCell)
     {
         DrawRectangle(cellInnerRight, cellInnerTop, WallThickness, wallHeight, WallColor);
     }
@@ -106,8 +108,6 @@ void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
         {
             for (int i = 0; i < maze.cellCount; i++)
             {
-                auto [x, y] = maze.CellPosition(i);
-
                 CellOption option;
                 option.isGoal = (i == goalCell);
 
@@ -116,7 +116,7 @@ void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
                     option.isInPath = true;
                 }
 
-                DrawCell(maze[i], x, y, option);
+                DrawCell(maze, i, option);
             }
         }
         EndMode2D();
