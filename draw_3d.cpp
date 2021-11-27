@@ -85,7 +85,7 @@ void Render3D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
             {
                 DrawCell(maze, i);
             }
-            
+
             // Player
             constexpr float PlayerWidth = 10;
             constexpr float PlayerHeight = 10;
@@ -95,9 +95,7 @@ void Render3D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
             constexpr float HalfPlayerHeight = PlayerHeight / 2;
             constexpr float HalfPlayerLength = PlayerLength / 2;
 
-            DrawCube({x * WallWidth, HalfPlayerHeight, z * WallLength}, PlayerWidth, PlayerHeight, PlayerLength, RED);
-            DrawCubeWires({x * WallWidth, HalfPlayerHeight, z * WallLength}, PlayerWidth, PlayerHeight, PlayerLength,
-                          BLACK);
+            DrawSphere({x * WallWidth, HalfPlayerHeight, z * WallLength}, HalfPlayerWidth, RED);
         }
         EndMode3D();
     }
