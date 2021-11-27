@@ -14,7 +14,7 @@ using namespace Render2D;
 
 using namespace MazeGen;
 
-constexpr int from = 0;
+constexpr int from = 125;
 constexpr int to = 2092;
 
 void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path);
@@ -39,7 +39,12 @@ int main()
     while (!WindowShouldClose())
     {
         Update(maze, currentCell, isShowingPath, path);
-        Draw(maze, path, currentCell, to, isShowingPath);
+        BeginDrawing();
+        {
+            ClearBackground(BLACK);
+            Draw(maze, path, currentCell, to, isShowingPath);
+        }
+        EndDrawing();
     }
 
     CloseWindow();

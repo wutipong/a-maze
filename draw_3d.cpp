@@ -12,7 +12,19 @@ constexpr float WallWidth = 20;
 constexpr float WallLength = 20;
 constexpr float WallHeight = 10;
 
-void DrawCell(MazeGen::Maze &maze, int currentCell)
+constexpr auto GoalCell = DARKGREEN;
+constexpr auto InPath = YELLOW;
+constexpr auto WallColor = DARKGRAY;
+constexpr auto WallLine = LIGHTGRAY;
+constexpr auto GroundColor = GRAY;
+
+struct CellOption
+{
+    bool isGoal = false;
+    bool isInPath = false;
+};
+
+void DrawCell(MazeGen::Maze &maze, int currentCell, CellOption option = {})
 {
     const auto [x, z] = maze.CellPosition(currentCell);
 
@@ -32,64 +44,80 @@ void DrawCell(MazeGen::Maze &maze, int currentCell)
     constexpr float SideWallWidth = CellWidth - WallWidth;
     constexpr float SideWallLength = CellLength - WallLength;
 
-    DrawPlane({xPos, 0, zPos}, {CellWidth, CellLength}, GRAY);
+    if (option.isGoal)
+    {
+        DrawPlane({xPos, 0, zPos}, {CellWidth, CellLength}, GoalCell);
+    }
+    else if (option.isInPath)
+    {
+        DrawPlane({xPos, 0, zPos}, {CellWidth, CellLength}, InPath);
+    }
+    else
+    {
+        DrawPlane({xPos, 0, zPos}, {CellWidth, CellLength}, GroundColor);
+    }
 
     // Raylib draws cube by using the cube's center as the reference point. We have to adjust the origin  so we can
-    // specify the outer edges as its positioning. 
-    
+    // specify the outer edges as its positioning.
+
     // Wall
     if (maze[currentCell].ConnectedCell(Direction::North) == InvalidCell)
     {
 
         DrawCube({xPos, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
-                 HalfWallLength, DARKGRAY);
+                 HalfWallLength, WallColor);
         DrawCubeWires({xPos, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
-                      HalfWallLength, LIGHTGRAY);
+                      HalfWallLength, WallLine);
     }
 
     if (maze[currentCell].ConnectedCell(Direction::South) == InvalidCell)
     {
         DrawCube({xPos, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength}, SideWallWidth, WallHeight,
-                 HalfWallLength, DARKGRAY);
+                 HalfWallLength, WallColor);
         DrawCubeWires({xPos, HalfWallHeight, zPos + HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
-                      HalfWallLength, LIGHTGRAY);
+                      HalfWallLength, WallLine);
     }
 
     if (maze[currentCell].ConnectedCell(Direction::West) == InvalidCell)
     {
         DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
-                 SideWallLength, DARKGRAY);
+                 SideWallLength, WallColor);
         DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
-                      SideWallLength, LIGHTGRAY);
+                      SideWallLength, WallLine);
     }
 
     if (maze[currentCell].ConnectedCell(Direction::East) == InvalidCell)
     {
         DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
-                 SideWallLength, DARKGRAY);
+                 SideWallLength, WallColor);
         DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
-                      SideWallLength, LIGHTGRAY);
+                      SideWallLength, WallLine);
     }
     // Corners
     DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
-             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+             HalfWallWidth, WallHeight, HalfWallLength, WallColor);
     DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
-                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
+                  HalfWallWidth, WallHeight, HalfWallLength, WallLine);
 
     DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
-             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+             HalfWallWidth, WallHeight, HalfWallLength, WallColor);
     DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
-                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
+                  HalfWallWidth, WallHeight, HalfWallLength, WallLine);
 
     DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
-             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
-    DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos +HalfCellLength - QuarterWallLength},
-                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
+             HalfWallWidth, WallHeight, HalfWallLength, WallColor);
+    DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
+                  HalfWallWidth, WallHeight, HalfWallLength, WallLine);
 
     DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
-             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+             HalfWallWidth, WallHeight, HalfWallLength, WallColor);
     DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
-                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
+                  HalfWallWidth, WallHeight, HalfWallLength, WallLine);
+}
+
+bool IsCellOnPath(MazeGen::Path &path, int &i)
+{
+    return std::find_if(path.begin(), path.end(), [&i](auto &n) { return (n.cell == i); }) != path.end();
 }
 } // namespace
 
@@ -109,29 +137,30 @@ void Render3D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
         .projection = CAMERA_PERSPECTIVE,
     };
 
-    BeginDrawing();
+    BeginMode3D(camera);
     {
-        ClearBackground(BLACK);
-
-        BeginMode3D(camera);
+        for (int i = 0; i < maze.cellCount; i++)
         {
-            for (int i = 0; i < maze.cellCount; i++)
+            CellOption option;
+            option.isGoal = (i == goalCell);
+            if (isShowingPath && IsCellOnPath(path, i))
             {
-                DrawCell(maze, i);
+                option.isInPath = true;
             }
 
-            // Player
-            constexpr float PlayerWidth = 20;
-            constexpr float PlayerHeight = 20;
-            constexpr float PlayerLength = 20;
-
-            constexpr float HalfPlayerWidth = PlayerWidth / 2;
-            constexpr float HalfPlayerHeight = PlayerHeight / 2;
-            constexpr float HalfPlayerLength = PlayerLength / 2;
-
-            DrawSphere({x * CellWidth, HalfPlayerHeight, z * CellLength}, HalfPlayerWidth, RED);
+            DrawCell(maze, i, option);
         }
-        EndMode3D();
+
+        // Player
+        constexpr float PlayerWidth = 20;
+        constexpr float PlayerHeight = 20;
+        constexpr float PlayerLength = 20;
+
+        constexpr float HalfPlayerWidth = PlayerWidth / 2;
+        constexpr float HalfPlayerHeight = PlayerHeight / 2;
+        constexpr float HalfPlayerLength = PlayerLength / 2;
+
+        DrawSphere({x * CellWidth, HalfPlayerHeight, z * CellLength}, HalfPlayerWidth, RED);
     }
-    EndDrawing();
+    EndMode3D();
 }

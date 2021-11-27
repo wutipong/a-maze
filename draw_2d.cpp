@@ -30,7 +30,7 @@ struct CellOption
 void DrawCell(Maze &maze, int cellId, const CellOption &option = {})
 {
     auto [columnId, rowId] = maze.CellPosition(cellId);
-   
+
     const int originX = columnId * CellWidth;
     const int originY = rowId * CellHeight;
 
@@ -93,36 +93,31 @@ void Render2D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
 {
     auto [x, y] = maze.CellPosition(currentCell);
 
-    Camera2D camera
-    {
+    Camera2D camera{
         .offset = {screenWidth / 2.0f, screenHeight / 2.0f},
         .target = {.x = float(x) * CellWidth, .y = float(y) * CellHeight},
         .zoom = 1.0f,
     };
 
-    BeginDrawing();
+    ClearBackground(BLACK);
+
+    BeginMode2D(camera);
     {
-        ClearBackground(BLACK);
-
-        BeginMode2D(camera);
+        for (int i = 0; i < maze.cellCount; i++)
         {
-            for (int i = 0; i < maze.cellCount; i++)
+            CellOption option;
+            option.isGoal = (i == goalCell);
+
+            if (isShowingPath && IsCellOnPath(path, i))
             {
-                CellOption option;
-                option.isGoal = (i == goalCell);
-
-                if (isShowingPath && IsCellOnPath(path, i))
-                {
-                    option.isInPath = true;
-                }
-
-                DrawCell(maze, i, option);
+                option.isInPath = true;
             }
+
+            DrawCell(maze, i, option);
         }
-        EndMode2D();
-        DrawCircle(screenWidth / 2, screenHeight / 2, 20, RED);
     }
-    EndDrawing();
+    EndMode2D();
+    DrawCircle(screenWidth / 2, screenHeight / 2, 20, RED);
 }
 
 void Render2D::Init(int w, int h)
