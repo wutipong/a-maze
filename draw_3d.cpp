@@ -1,13 +1,15 @@
 #include "draw_3d.hpp"
 #include <raylib.h>
 
+using namespace MazeGen;
+
 namespace
 {
 constexpr float CellWidth = 50;
 constexpr float CellLength = 50;
 
-constexpr float WallWidth = 10;
-constexpr float WallLength = 10;
+constexpr float WallWidth = 20;
+constexpr float WallLength = 20;
 constexpr float WallHeight = 10;
 
 void DrawCell(MazeGen::Maze &maze, int currentCell)
@@ -24,37 +26,70 @@ void DrawCell(MazeGen::Maze &maze, int currentCell)
     constexpr float HalfWallLength = WallLength / 2;
     constexpr float HalfWallHeight = WallHeight / 2;
 
+    constexpr float QuarterWallWidth = HalfWallWidth / 2;
+    constexpr float QuarterWallLength = HalfWallLength / 2;
+
     constexpr float SideWallWidth = CellWidth - WallWidth;
     constexpr float SideWallLength = CellLength - WallLength;
 
     DrawPlane({xPos, 0, zPos}, {CellWidth, CellLength}, GRAY);
 
+    // Raylib draws cube by using the cube's center as the reference point. We have to adjust the origin  so we can
+    // specify the outer edges as its positioning. 
+    
     // Wall
-    DrawCube({xPos, HalfWallHeight, -HalfCellLength}, SideWallWidth, WallHeight, HalfWallLength, DARKGRAY);
-    DrawCubeWires({xPos, HalfWallHeight, -HalfCellLength}, SideWallWidth, WallHeight, HalfWallLength, SKYBLUE);
+    if (maze[currentCell].ConnectedCell(Direction::North) == InvalidCell)
+    {
 
-    DrawCube({xPos, HalfWallHeight, HalfCellLength}, SideWallWidth, WallHeight, HalfWallLength, DARKBLUE);
-    DrawCubeWires({xPos, HalfWallHeight, HalfCellLength}, SideWallWidth, WallHeight, HalfWallLength, SKYBLUE);
+        DrawCube({xPos, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
+                 HalfWallLength, DARKGRAY);
+        DrawCubeWires({xPos, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
+                      HalfWallLength, LIGHTGRAY);
+    }
 
-    DrawCube({-HalfCellWidth, HalfWallHeight, 0.0f}, HalfWallWidth, WallHeight, SideWallLength, DARKGREEN);
-    DrawCubeWires({-HalfCellWidth, HalfWallHeight, 0.0f}, HalfWallWidth, WallHeight, SideWallLength, SKYBLUE);
+    if (maze[currentCell].ConnectedCell(Direction::South) == InvalidCell)
+    {
+        DrawCube({xPos, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength}, SideWallWidth, WallHeight,
+                 HalfWallLength, DARKGRAY);
+        DrawCubeWires({xPos, HalfWallHeight, zPos + HalfCellLength + QuarterWallLength}, SideWallWidth, WallHeight,
+                      HalfWallLength, LIGHTGRAY);
+    }
 
-    DrawCube({HalfCellWidth, HalfWallHeight, 0.0f}, HalfWallWidth, WallHeight, SideWallLength, DARKPURPLE);
-    DrawCubeWires({HalfCellWidth, HalfWallHeight, 0.0f}, HalfWallWidth, WallHeight, SideWallLength, SKYBLUE);
+    if (maze[currentCell].ConnectedCell(Direction::West) == InvalidCell)
+    {
+        DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
+                 SideWallLength, DARKGRAY);
+        DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
+                      SideWallLength, LIGHTGRAY);
+    }
 
+    if (maze[currentCell].ConnectedCell(Direction::East) == InvalidCell)
+    {
+        DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
+                 SideWallLength, DARKGRAY);
+        DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos}, HalfWallWidth, WallHeight,
+                      SideWallLength, LIGHTGRAY);
+    }
     // Corners
-    DrawCube({-HalfCellWidth/2, HalfWallHeight, -HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, RED);
-    DrawCubeWires({-HalfCellWidth/2, HalfWallHeight, -HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength,
-                  SKYBLUE);
+    DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
+             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+    DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
+                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
 
-    DrawCube({HalfCellWidth, HalfWallHeight, HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, GREEN);
-    DrawCubeWires({HalfCellWidth, HalfWallHeight, HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, SKYBLUE);
+    DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
+             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+    DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
+                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
 
-    DrawCube({-HalfCellWidth, HalfWallHeight, HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, BLUE);
-    DrawCubeWires({-HalfCellWidth, HalfWallHeight, HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, SKYBLUE);
+    DrawCube({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos + HalfCellLength - QuarterWallLength},
+             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+    DrawCubeWires({xPos - HalfCellWidth + QuarterWallWidth, HalfWallHeight, zPos +HalfCellLength - QuarterWallLength},
+                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
 
-    DrawCube({HalfCellWidth, HalfWallHeight, -HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, WHITE);
-    DrawCubeWires({HalfCellWidth, HalfWallHeight, -HalfCellLength}, HalfWallWidth, WallHeight, HalfWallLength, SKYBLUE);
+    DrawCube({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
+             HalfWallWidth, WallHeight, HalfWallLength, DARKGRAY);
+    DrawCubeWires({xPos + HalfCellWidth - QuarterWallWidth, HalfWallHeight, zPos - HalfCellLength + QuarterWallLength},
+                  HalfWallWidth, WallHeight, HalfWallLength, LIGHTGRAY);
 }
 } // namespace
 
@@ -64,12 +99,11 @@ void Render3D::Init(int screenWidth, int screenHeight)
 
 void Render3D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, int goalCell, bool isShowingPath)
 {
-
     auto [x, z] = maze.CellPosition(currentCell);
 
     Camera3D camera = {
-        .position = {x * WallWidth, 100.0f, 100.0f + (z * WallLength)},
-        .target = {x * WallWidth, 0.0f, z * WallLength},
+        .position = {x * CellWidth, 100.0f, 100.0f + (z * CellLength)},
+        .target = {x * CellWidth, 0.0f, z * CellLength},
         .up = {0.0f, 1.0f, 0.0f},
         .fovy = 45.0f,
         .projection = CAMERA_PERSPECTIVE,
@@ -87,15 +121,15 @@ void Render3D::Draw(MazeGen::Maze &maze, MazeGen::Path &path, int currentCell, i
             }
 
             // Player
-            constexpr float PlayerWidth = 10;
-            constexpr float PlayerHeight = 10;
-            constexpr float PlayerLength = 10;
+            constexpr float PlayerWidth = 20;
+            constexpr float PlayerHeight = 20;
+            constexpr float PlayerLength = 20;
 
             constexpr float HalfPlayerWidth = PlayerWidth / 2;
             constexpr float HalfPlayerHeight = PlayerHeight / 2;
             constexpr float HalfPlayerLength = PlayerLength / 2;
 
-            DrawSphere({x * WallWidth, HalfPlayerHeight, z * WallLength}, HalfPlayerWidth, RED);
+            DrawSphere({x * CellWidth, HalfPlayerHeight, z * CellLength}, HalfPlayerWidth, RED);
         }
         EndMode3D();
     }
