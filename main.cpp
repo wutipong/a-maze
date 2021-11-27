@@ -14,27 +14,27 @@ using namespace Render2D;
 
 using namespace MazeGen;
 
-constexpr int from = 125;
-constexpr int to = 2092;
+constexpr int StartCell = 125;
+constexpr int GoalCell = 2092;
+
+constexpr int ScreenWidth = 1280;
+constexpr int ScreenHeight = 720;
 
 void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path);
-
+void DrawInstruction();
 
 int main()
 {
-    constexpr int screenWidth = 1280;
-    constexpr int screenHeight = 720;
-
-    InitWindow(screenWidth, screenHeight, "A-Maze");
+    InitWindow(ScreenWidth, ScreenHeight, "A-Maze");
     SetTargetFPS(60);
 
     auto maze = MazeGen::Generate(50, 50);
-    auto path = MazeGen::FindPathDFS(maze, from, to);
+    auto path = MazeGen::FindPathDFS(maze, StartCell, GoalCell);
     bool isShowingPath = false;
 
-    int currentCell = from;
+    int currentCell = StartCell;
 
-    Init(screenWidth, screenHeight);
+    Init(ScreenWidth, ScreenHeight);
 
     while (!WindowShouldClose())
     {
@@ -42,7 +42,9 @@ int main()
         BeginDrawing();
         {
             ClearBackground(BLACK);
-            Draw(maze, path, currentCell, to, isShowingPath);
+            Draw(maze, path, currentCell, GoalCell, isShowingPath);
+
+            DrawInstruction();
         }
         EndDrawing();
     }
@@ -97,7 +99,22 @@ void Update(Maze &maze, int &currentCellId, bool &showPath, MazeGen::Path &path)
         showPath = !showPath;
         if (showPath)
         {
-            path = FindPathDFS(maze, currentCellId, to);
+            path = FindPathDFS(maze, currentCellId, GoalCell);
         }
     }
+}
+
+void DrawInstruction()
+{
+    constexpr int posX = ScreenWidth - 500;
+    constexpr int posY = ScreenHeight - 220;
+    constexpr int width = 480;
+    constexpr int height = 200;
+
+    DrawRectangleGradientV(posX, posY, width, height, Color{0, 0, 0, 0x80}, Color{0, 0, 0, 0xB0});
+
+    DrawText("Instruction", posX+10, posY+10, 20, YELLOW);
+    DrawText("Moves to the green cell desinated somewhere in this maze.", posX + 20, posY + 40, 16, WHITE);
+    DrawText("* WSAD/Arrow Key - Moves the player.", posX + 20, posY + 80, 16, WHITE);
+    DrawText("* P - Toggles the path finder.", posX + 20, posY + 110, 16, WHITE);
 }
