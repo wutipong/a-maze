@@ -2,6 +2,8 @@
 #include <maze_path.hpp>
 #include <raylib.h>
 
+// #define RENDER_3D
+
 #ifdef RENDER_3D
 #include "draw_3d.hpp"
 using namespace Render3D;
@@ -12,7 +14,7 @@ using namespace Render2D;
 
 using namespace MazeGen;
 
-constexpr int from = 175;
+constexpr int from = 0;
 constexpr int to = 2092;
 
 void Update(Maze &maze, int &currentCell, bool &showPath, MazeGen::Path &path);
